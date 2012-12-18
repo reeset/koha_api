@@ -119,6 +119,11 @@ namespace koha_api
         //Data must be passed in MARCXML
         public bool UpdateRecord(string rec, string id)
         {
+            return UpdateRecord(rec, id, false);
+        }
+
+        public bool UpdateRecord(string rec, string id, bool b_items) 
+        {
             string uri = "";
 
             if (id == "")
@@ -128,8 +133,19 @@ namespace koha_api
             }
             else
             {
+                
                 //this is for updated records
                 uri = Host + "/cgi-bin/koha/svc/bib/" + id;
+
+                //if the items bit is passed, add
+                //the items element to the url to 
+                //indicate that item data should be 
+                //updated or added if present in the 
+                //record.
+                if (b_items == true)
+                {
+                    uri += "?items=1";
+                }
             }
 
             HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(uri);

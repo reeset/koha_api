@@ -23,11 +23,18 @@ namespace koha_api
         private string pusername = "";
         private string ppassword = "";
         private string p_host = "";
-        
+        private bool pssl = false;
+
         public string Error_Message
         {
             set { perror_message = value; }
             get { return perror_message; }
+        }
+
+        public bool Ignore_SSL_Errors
+        {
+            set { pssl = value; }
+            get { return pssl; }
         }
 
         public string Debug_Info {
@@ -62,7 +69,7 @@ namespace koha_api
             pusername = username;
             ppassword = password;
             bool is_authorized = false;
-
+            objA.Ignore_SSL_Certificates = Ignore_SSL_Errors;
             try
             {
                 is_authorized = objA.Authorize(Host, username, password, out perror_message, out cookieJar);
@@ -80,8 +87,13 @@ namespace koha_api
         public string GetRecord(string id)
         {
             string uri = Host + "/cgi-bin/koha/svc/bib/" + id + "?userid=" + pusername + "&password=" + ppassword;
+            if (Ignore_SSL_Errors == true)
+            {
+                Authentications.IgnoreBadCertificates();
+            }
             HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(uri);
             request.CookieContainer = cookieJar;
+            
 
             try
             {
@@ -148,7 +160,12 @@ namespace koha_api
                 }
             }
 
+            if (Ignore_SSL_Errors == true)
+            {
+                Authentications.IgnoreBadCertificates();
+            }
             HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(uri);
+            
             request.CookieContainer = cookieJar;
             request.Method = "POST";
             request.ContentType = @"text/xml";
